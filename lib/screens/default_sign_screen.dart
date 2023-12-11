@@ -9,6 +9,77 @@ class DefaultSignScreen extends StatefulWidget {
 }
 
 class _DefaultSignScreenState extends State<DefaultSignScreen> {
+  String formatText(String name) {
+    String fullName = name;
+    List<String> names = fullName.split(' ');
+
+    // Exclude titles logic - check truncatedFirstName and truncatedSecondName below
+    List<String> prefixTitles = [
+      'Mr',
+      'Ms',
+      'Mrs',
+      'Dr',
+      'Fr',
+      'Prof',
+      'Mr.',
+      'Ms.',
+      'Mrs.',
+      'Dr.',
+      'Fr.',
+      'Prof.'
+    ];
+
+    // Suffix list
+    List<String> suffixTitles = [
+      'Jr',
+      'Sr',
+      'C/O',
+      'D/O',
+      'S/O',
+      'Jr.',
+      'Sr.',
+      'C/O.',
+      'D/O.',
+      'S/O.'
+    ];
+
+    // Prefix check
+    String truncatedFirstName =
+        names.isNotEmpty && !prefixTitles.contains(names[0]) ? names[0] : '';
+
+    // Add initial letters of other names
+    // First name single letter means display second name fully logic
+    String truncatedSecondName = names.length > 1
+        ? truncatedFirstName == '' || truncatedFirstName.length == 1
+            ? names[1]
+            : names[1].substring(0, 1).toUpperCase()
+        : '';
+
+    // Suffix check
+    String truncatedThirdName =
+        names.length > 2 && !suffixTitles.contains(names[2])
+            ? names[2].substring(0, 1)
+            : '';
+
+    // Suffix check
+    String truncatedFourthName =
+        names.length > 3 && !suffixTitles.contains(names[3])
+            ? names[3].substring(0, 1)
+            : '';
+
+    // Uppercase is add using .toUpperCase() method
+    String formattedName =
+        '$truncatedFirstName $truncatedSecondName ${truncatedThirdName.toUpperCase()} ${truncatedFourthName.toUpperCase()}'
+            .trim();
+
+    // Limit text to 18 characters
+    (formattedName.length > 18)
+        ? formattedName = formattedName.substring(0, 18)
+        : formattedName;
+
+    return formattedName;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +89,7 @@ class _DefaultSignScreenState extends State<DefaultSignScreen> {
       body: Column(
         children: [
           _buildHeadingWidget(),
-          _buildDefaultSignWidget(context),
+          _buildDefaultSignWidget(context, name: 'Newall Jemuel Sr'),
           _buildButtonWidget(),
           _buildSubmitButton(),
         ],
@@ -78,7 +149,7 @@ class _DefaultSignScreenState extends State<DefaultSignScreen> {
     );
   }
 
-  Widget _buildDefaultSignWidget(BuildContext context) {
+  Widget _buildDefaultSignWidget(BuildContext context, {String? name}) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       height: 250,
@@ -87,12 +158,14 @@ class _DefaultSignScreenState extends State<DefaultSignScreen> {
         color: const Color.fromARGB(255, 228, 225, 225),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: const Center(
+      child: Center(
         child: Text(
-          'Newall',
-          style: TextStyle(
+          formatText(name ?? '--'),
+          maxLines: 1,
+          style: const TextStyle(
             fontFamily: 'Signature',
-            fontSize: 100.0,
+            // Fontsize is given 48, 56, 64
+            fontSize: 64,
             color: Colors.blue,
           ),
         ),

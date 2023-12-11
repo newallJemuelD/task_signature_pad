@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:eval_task_signature/screens/output_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:signature/signature.dart';
@@ -10,6 +13,12 @@ class SignManualScreen extends StatefulWidget {
 }
 
 class _SignManualScreenState extends State<SignManualScreen> {
+  Uint8List? signatureData;
+
+  saveImage() async {
+    signatureData = await _controller.toPngBytes();
+  }
+
   final SignatureController _controller = SignatureController(
     penStrokeWidth: 3,
     penColor: Colors.blue,
@@ -24,7 +33,7 @@ class _SignManualScreenState extends State<SignManualScreen> {
       body: Column(
         children: [
           _buildHeadingWidget(),
-          _buildDefaultSignWidget(context),
+          _buildManualSignWidget(context),
           _buildClearWidget(),
           _buildSubmitButton(),
         ],
@@ -60,20 +69,30 @@ class _SignManualScreenState extends State<SignManualScreen> {
         const SizedBox(
           height: 130,
         ),
-        Container(
-          width: MediaQuery.of(context).size.width,
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: const Center(
-            child: Text(
-              'SUBMIT',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
+        InkWell(
+          onTap: () async {
+            await saveImage();
+
+            // ignore: use_build_context_synchronously
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return OutputScreen(imageData: signatureData);
+            }));
+          },
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(vertical: 15),
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: const Center(
+              child: Text(
+                'SUBMIT',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -82,7 +101,7 @@ class _SignManualScreenState extends State<SignManualScreen> {
     );
   }
 
-  Widget _buildDefaultSignWidget(BuildContext context) {
+  Widget _buildManualSignWidget(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       height: 250,
